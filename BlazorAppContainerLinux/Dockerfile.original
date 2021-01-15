@@ -1,0 +1,40 @@
+#See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-buster-slim AS base
+
+WORKDIR /app
+
+
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
+WORKDIR /src
+COPY ["BlazorAppContainerLinux/BlazorAppContainerLinux.csproj", "BlazorAppContainerLinux/"]
+
+RUN dotnet restore "BlazorAppContainerLinux/BlazorAppContainerLinux.csproj"
+COPY . .
+WORKDIR "/src/BlazorAppContainerLinux"
+RUN dotnet build "BlazorAppContainerLinux.csproj" -c Debug -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "BlazorAppContainerLinux.csproj" -c Debug -o /app/publish
+
+RUN apt-get update \ 
+     && apt-get install -y --no-install-recommends dialog \
+     && apt-get update \
+     && apt-get install -y --no-install-recommends openssh-server \
+     && echo "root:Docker!" | chpasswd 
+
+#COPY ["BlazorAppContainerLinux/sshd_config", "/etc/ssh/"]
+#CMD ["/usr/sbin/sshd", "-D"]
+RUN service ssh start
+#RUN service ssh enable
+
+EXPOSE 80
+EXPOSE 443
+EXPOSE 2222
+EXPOSE 22
+
+CMD ["/usr/bin/ssh","-D"]
+
+#FROM base AS final
+#WORKDIR /app
+#COPY --from=publish /app/publish .
+#ENTRYPOINT ["dotnet", "BlazorAppContainerLinux.dll"]

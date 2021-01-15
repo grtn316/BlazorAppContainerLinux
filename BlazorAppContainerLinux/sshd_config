@@ -1,0 +1,24 @@
+# This is ssh server systemwide configuration file.
+#
+# /etc/sshd_config
+
+Port 				2222
+ListenAddress 		0.0.0.0
+LoginGraceTime 		180
+X11Forwarding 		yes
+#Ciphers aes128-cbc,3des-cbc,aes256-cbc,aes128-ctr,aes192-ctr,aes256-ctr 
+#MACs hmac-sha1,hmac-sha1-96
+Ciphers aes256-cbc,aes192-cbc,aes128-cbc,3des-cbc
+HostKeyAlgorithms ssh-rsa
+KexAlgorithms diffie-hellman-group-exchange-sha256,diffie-hellman-group-exchange-sha1,diffie-hellman-group14-sha1
+MACs hmac-sha2-256,hmac-sha1
+StrictModes 		yes
+SyslogFacility 		DAEMON
+PasswordAuthentication 	yes
+PermitEmptyPasswords 	no
+PermitRootLogin 	yes
+Subsystem sftp internal-sftp
+ChallengeResponseAuthentication yes
+UsePAM	no
+LogLevel	DEBUG3
+PubkeyAuthentication yes
